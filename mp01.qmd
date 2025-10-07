@@ -1,6 +1,9 @@
 ---
 title: "Mini-Project #01: Gourmet Cheeseburgers Across the Globe: Exploring the Most Popular Programming on Netflix"
+
+Author: Xuejian Wang
 ---
+
 
 ```{r}
 if(!dir.exists(file.path("data", "mp01"))){
@@ -215,6 +218,8 @@ COUNTRY_TOP_10 |>
 
 ```
 
+### Press Releases
 
+## Stranger Things Season 5: A Global Phenomenon Returns
 
 
