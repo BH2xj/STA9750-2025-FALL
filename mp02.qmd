@@ -1,7 +1,14 @@
 ---
 title: "Mini-Project #02: Making Backyards Affordable for All"
+outpute:
+  html_document
 author: Xuejian Wang
-date: Oct 31, 2025
+format:
+  html:
+    toc: true          # 显示目录
+    toc-depth: 3       # 目录层级（可选）
+    toc-location: left # 目录显示在左侧（可选）
+    code-fold: true    # 可折叠代码
 ---
 
 # Introduction
@@ -11,19 +18,20 @@ Housing affordability is a growing challenge in many U.S. cities. This project, 
 # Data Acquisition
 In this project, two data sources are employed. My goal is to explore the areas where the increase of permits will increase the population, the industry types, and finally is beneficial to households income and people's wages. This analysis could be as a reference when politicians make YIMBY-related policies and whether this kind of policies could benefit their reelection prospects.
 
-1. US Census Bureau’s Annual Community Survey
-  1. INCOME
-  2. RENT
-  3. POPULATION
-  4. HOUSEHOLDS
-  5. PERMITS
-2. the Bureau of Labor Statistics’ Quarterly Census of Employment and Wages
-  1. INDUSTRY_CODES
-  2. WAGES
-  
-![ER Diagram of Data Tables](/Users/xjw/Downloads/mp02_join)
+1. US Census Bureau’s Annual Community Survey  
+    - INCOME  
+    - RENT  
+    - POPULATION  
+    - HOUSEHOLDS  
+    - PERMITS  
 
-```{r data, include = FALSE}
+2. The Bureau of Labor Statistics’ Quarterly Census of Employment and Wages  
+    - INDUSTRY_CODES  
+    - WAGES
+  
+![](mp02_join_new.png)
+
+```{r data1, include = FALSE}
 # 如果 data/mp02 文件夹不存在，就创建它。
 if(!dir.exists(file.path("data", "mp02"))){
     dir.create(file.path("data", "mp02"), showWarnings=FALSE, recursive=TRUE)
@@ -105,7 +113,7 @@ HOUSEHOLDS <- get_acs_all_years("B11001_001") |>
     rename(households = B11001_001)
 ```
 
-```{r data, include = FALSE}
+```{r data2, include = FALSE}
 # GET the number of new housing units built each year
 get_building_permits <- function(start_year = 2009, end_year = 2023){
     fname <- glue("housing_units_{start_year}_{end_year}.csv")
@@ -189,7 +197,7 @@ PERMITS <- get_building_permits()
 ```
 
 
-```{r data, include = FALSE}
+```{r data3, include = FALSE}
 #acquire income estimates from the Bureau of Labor Statistics (BLS)
 
 library(httr2) # 用于 HTTP 请求（下载网页内容）
@@ -285,7 +293,7 @@ get_bls_industry_codes <- function(){
 INDUSTRY_CODES <- get_bls_industry_codes()
 ```
 
-```{r data, include = FALSE}
+```{r data4, include = FALSE}
 # BLS Quarterly Census of Employment and Wages
 
 library(httr2)
@@ -360,7 +368,8 @@ WAGES <- get_bls_qcew_annual_averages()
 
 # Data Integration and Initial Exploration
 
-## 1. The largest number of new housing units in the decade from 2010 to 2019 permitted by the CBSA is 482,075.
+## 1. New Housing units
+The largest number of new housing units in the decade from 2010 to 2019 permitted by the CBSA is 482,075.
 ```{r}
 # PERMITS from 2010 to 2019
 PERMITS_2010_2019 <- PERMITS |>
@@ -387,7 +396,8 @@ datatable(
 
 ```
 
-## 2. The table shows top 5 new housing units permitted in Albuquerque. In 2021, Albuquerque permitted 4021 new housing units, which was the most. Compared to the others ranking from second to fifth, the permitted data 4021 in 2021 is too high, which could be that the data in 2020 was delayed due to the Covid, and added to the year 2021 to release altogether.
+## 2. Spike in Albuquerque Housing Permits in 2021 Likely Due to COVID-19 Delays
+The table shows top 5 new housing units permitted in Albuquerque. In 2021, Albuquerque permitted 4021 new housing units, which was the most. Compared to the others ranking from second to fifth, the permitted data 4021 in 2021 is too high, which could be that the data in 2020 was delayed due to the Covid, and added to the year 2021 to release altogether.
 ```{r}
 
 PERMITS_NM_max <- PERMITS |>
@@ -517,7 +527,8 @@ DT::datatable(
   )
 
 ```
-## 5. The first table shows fractions of total wages in the NYC CBSA that was earned by people employed in the finance and insurance industries. The second table demonstrates that this fraction peaked in 2015.
+## 5. Finance and Insurance Wage Share in NYC Peaked in 2015
+The first table shows fractions of total wages in the NYC CBSA that was earned by people employed in the finance and insurance industries. The second table demonstrates that this fraction peaked in 2015.
 
 ```{r}
 # total wages in NYC: p(52)
@@ -599,7 +610,8 @@ ggplot(rent_income, aes(x=avg_monthly_rent_per_CBSA, y=avg_household_income_per_
   
 ```
 
-### 6.2. The relationship between total employment and total employment in the health care and social services sector (NAICS 62) across different CBSAs. Design your visualization so that it is possible to see the evolution of this relationship over time.
+### 6.2. Evolution of Health Care Employment vs. Total Employment Across CBSAs
+The relationship between total employment and total employment in the health care and social services sector (NAICS 62) across different CBSAs. Design your visualization so that it is possible to see the evolution of this relationship over time.
 
 1. Each year shows a strong positive relationship between total employment and health/social services employment across CBSAs.
 2. The slope and spread are consistent over time, but the points shift slightly upward in later years.
