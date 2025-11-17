@@ -11,12 +11,12 @@ format:
     code-fold: true    # 可折叠代码
 ---
 # Introduction
-    New York City has a large and valuable urban tree canopy that provides important environmental and community benefits. In this mini-project, Data from the NYC TreeMap will be used to analyze the distribution of trees across the city. The data of NYC City Council Districts is achieved from the NYC Department of Planning site. Using spatial tools in R, I will map tree locations, connect them to City Council districts, and explore key patterns. Finally, I will propose a program or recommendation to help NYC Parks support and maintain the city’s trees.
+New York City has a large and valuable urban tree canopy that provides important environmental and community benefits. In this mini-project, Data from the NYC TreeMap will be used to analyze the distribution of trees across the city. The data of NYC City Council Districts is achieved from the NYC Department of Planning site. Using spatial tools in R, I will map tree locations, connect them to City Council districts, and explore key patterns. Finally, I will propose a program or recommendation to help NYC Parks support and maintain the city’s trees.
 
 # Data Acquisition
-    Two datasets were downloaded: NYC City Council district boundaries and the NYC TreeMap street tree data. The district shapefile was simplified and converted to WGS84, and the tree dataset was retrieved from NYC’s open data portal. Both were loaded into R using sf and prepared for mapping and spatial analysis.
+Two datasets were downloaded: NYC City Council district boundaries and the NYC TreeMap street tree data. The district shapefile was simplified and converted to WGS84, and the tree dataset was retrieved from NYC’s open data portal. Both were loaded into R using sf and prepared for mapping and spatial analysis.
 
-```{r, nyc_council, message = False}
+```{r, nyc_council, message = FALSE, echo = FALSE}
 library(sf)
 library(tidyverse)
 library(httr2)
@@ -90,7 +90,7 @@ plot(nyc_council_simple["CounDist"], main = "Simplified NYC City Council Distric
 
 ```
 
-```{r, nyc_council, message = False}
+```{r, tree_points, message = FALSE, echo = FALSE}
 # the base URL for this API https://data.cityofnewyork.us/resource/hn5i-inap.geojson
 # Load required packages
 library(httr2)
@@ -213,7 +213,7 @@ plot(nyc_trees["tpstructure"], main = "NYC Trees")
 
 # Data Integration and Initial Exploration
 ## Mapping NYC Trees
-    This map displays all NYC street trees as points layered over the 51 City Council districts. The district polygons provide the city’s political boundaries, while each tree is shown according to its structural condition (such as Full, Retired, Shaft, or Stump). Because more than a million trees are plotted, the map appears dense, but it clearly shows how trees are spread across the city and highlights areas with especially high concentrations of street trees.
+This map displays all NYC street trees as points layered over the 51 City Council districts. The district polygons provide the city’s political boundaries, while each tree is shown according to its structural condition (such as Full, Retired, Shaft, or Stump). Because more than a million trees are plotted, the map appears dense, but it clearly shows how trees are spread across the city and highlights areas with especially high concentrations of street trees.
 ```{r}
 
 # ggplot map with two layers
@@ -225,7 +225,7 @@ ggplot() +
           size = 0.3) +
   # Tree points (many points → use high transparency)
   geom_sf(data = nyc_trees, 
-          aes(color = tpstructure), 
+          aes(color = tpstructure, group = tpstructure), 
           alpha = 0.3, 
           size = 0.5) +
 
@@ -287,9 +287,10 @@ datatable(
                "Density"
                ),
   options = list(
+    pageLength = 5,
     searching = FALSE,
     info = FALSE,
-    paging = FALSE,     # 只有一行时关闭分页
+    paging = TRUE,     # 只有一行时关闭分页
     autoWidth = TRUE
   )
 ) |>
@@ -307,6 +308,7 @@ datatable(
     mark = ",", 
     digits = 0
   )
+
 
 
 ```
@@ -473,7 +475,7 @@ datatable(
 ```
 
 ### 5. Tree Closest to Baruch’s Campus
-    The result shows that the closest tree to Baruch College is a Liquidambar styraciflua (Sweetgum), located approximately 22.7 meters from the campus. The tree is in Good condition and is situated within Manhattan Council District 2.
+The result shows that the closest tree to Baruch College is a Liquidambar styraciflua (Sweetgum), located approximately 22.7 meters from the campus. The tree is in Good condition and is situated within Manhattan Council District 2.
 ```{r}
 # Create point for Baruch College
 new_st_point <- function(lat, lon, ...){
@@ -492,15 +494,17 @@ trees_joined |>
 ```
 
 # Government Project Design
+
 ## Project Title
 NYC Parks Proposal — Improving Tree Health around the Chinatown Area (CounDist 1)
-## Project Description
-    This project proposes a focused tree-revitalization effort in NYC Council District 1, serving the neighborhoods of Lower Manhattan, Chinatown, and the Financial District. Compared with nearby Districts 11 in the Bronx, 19 in Queens, and 33 in Brooklyn, District 1 shows a notably high proportion of dead or declining trees relative to its smaller land area.
 
-    To address this, the project will remove dead or damaged trees, replace old stumps, and plant new, healthy trees in locations that currently lack shade, greenery, and environmental protection. The goal is to restore the district’s aging tree canopy, improve air quality, reduce heat exposure, and enhance the overall streetscape for residents, workers, and visitors.
+## Project Description
+This project proposes a focused tree-revitalization effort in NYC Council District 1, serving the neighborhoods of Lower Manhattan, Chinatown, and the Financial District. Compared with nearby Districts 11 in the Bronx, 19 in Queens, and 33 in Brooklyn, District 1 shows a notably high proportion of dead or declining trees relative to its smaller land area.
+
+To address this, the project will remove dead or damaged trees, replace old stumps, and plant new, healthy trees in locations that currently lack shade, greenery, and environmental protection. The goal is to restore the district’s aging tree canopy, improve air quality, reduce heat exposure, and enhance the overall streetscape for residents, workers, and visitors.
     
 ## The Desired Scope of The Project
-    We propose replacing all dead trees in District 1 (1465 trees), removing existing stumps (131 stumps), and planting approximately 1915 new trees to restore canopy coverage and prevent further decline.
+We propose replacing all dead trees in District 1 (1465 trees), removing existing stumps (131 stumps), and planting approximately 1915 new trees to restore canopy coverage and prevent further decline.
 ```{r}
 library(dplyr)
 
@@ -528,7 +532,7 @@ new_plantings
 ```
 
 ## Zoomed-In Map of Trees in District 1
-    District 1 covers the southern tip of Manhattan, including Chinatown and the Financial District. It is a busy, highly developed area with limited space for trees. Most trees in the district are in good or excellent condition, but there are some stressed or older trees in crowded streets near Chinatown. Because the area gets so much foot traffic and heat, maintaining and planting trees here is important for shade, cleaner air, and improving daily comfort for residents and visitors.
+District 1 covers the southern tip of Manhattan, including Chinatown and the Financial District. It is a busy, highly developed area with limited space for trees. Most trees in the district are in good or excellent condition, but there are some stressed or older trees in crowded streets near Chinatown. Because the area gets so much foot traffic and heat, maintaining and planting trees here is important for shade, cleaner air, and improving daily comfort for residents and visitors.
 ```{r}
 library(sf)
 library(dplyr)
@@ -637,7 +641,7 @@ ggplot(df_compare, aes(x = factor(CounDist), y = tree_count)) +
 
 ## Comparison of Dead Tree Fractions
 
-    District 1 has the highest proportion of dead trees (about 23%), noticeably higher than Districts 11, 19, and 33. District 33 has the lowest fraction of dead trees, while Districts 11 and 19 fall in the middle. This suggests that District 1 faces greater tree health challenges and would benefit most from targeted maintenance or replanting efforts.
+District 1 has the highest proportion of dead trees (about 23%), noticeably higher than Districts 11, 19, and 33. District 33 has the lowest fraction of dead trees, while Districts 11 and 19 fall in the middle. This suggests that District 1 faces greater tree health challenges and would benefit most from targeted maintenance or replanting efforts.
 ```{r}
 compare_plot_data <- district_summary |> 
   filter(CounDist %in% c(1, 11, 19, 33))
@@ -655,7 +659,7 @@ ggplot(compare_plot_data, aes(x = factor(CounDist), y = dead_fraction, fill = fa
 ```
 
 ## Comparison of Dead Trees
-    The figure shows that although other districts (especially 19) have more dead trees in absolute terms, District 1’s problem is proportionally worse. Together, the charts highlight that District 1 faces a more concentrated tree-health crisis and is a strong candidate for targeted intervention.
+The figure shows that although other districts (especially 19) have more dead trees in absolute terms, District 1’s problem is proportionally worse. Together, the charts highlight that District 1 faces a more concentrated tree-health crisis and is a strong candidate for targeted intervention.
 ```{r}
 district_summary |>
   filter(CounDist %in% c(1, 11, 19, 33)) |>
@@ -673,4 +677,4 @@ district_summary |>
 ```
 
 ## Summary
-    This project aims to revitalize the street-tree canopy in NYC Council District 1, which has a higher share of dead or declining trees than comparable districts in the Bronx, Queens, and Brooklyn. The plan focuses on removing hazardous or dead trees, replacing old stumps, and planting new trees to increase shade, improve air quality, and enhance the overall environment in Lower Manhattan, Chinatown, and the Financial District.
+This project aims to revitalize the street-tree canopy in NYC Council District 1, which has a higher share of dead or declining trees than comparable districts in the Bronx, Queens, and Brooklyn. The plan focuses on removing hazardous or dead trees, replacing old stumps, and planting new trees to increase shade, improve air quality, and enhance the overall environment in Lower Manhattan, Chinatown, and the Financial District.
