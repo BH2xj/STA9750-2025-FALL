@@ -1,8 +1,16 @@
 ---
-title: "Xxj"
+title: "Xuejian(Susan) Wang"
 ---
 
-Test test Test
+
+I’m an educator turning data scientist. For over a decade, I taught English and math in the U.S. and China, while also designing programs, managing teams, and improving learning outcomes through data.
+
+My experiences in education inspired me to focus more deeply on data and problem-solving, which led me to pursue a Master’s in Statistics (Data Science Track) at Baruch College. Today, I’m building strong analytical and technical skills to connect my teaching background with meaningful, data-driven insights.
+
+My mission: to use DATA to uncover patterns, solve problems, and create practical solutions that make a positive impact.
+
+Welcome to connect me at my [Linkedin](https://www.linkedin.com/in/xuejian-susan-wang-987881225/) and [github](https://github.com/BH2xj).
+
 
 ```{r}
 #| echo: false
@@ -16,7 +24,7 @@ if(!require("leaflet")){
 }
 
 baruch_longitude <- -73.98333
-baruch_latitude  <- +40.75028
+baruch_latitude  <- +40.74028
 
 leaflet() |>
   addTiles() |>
