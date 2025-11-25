@@ -236,6 +236,38 @@ ggplot() +
 
 ```
 
+## Mapping NYC Trees (Interactive)
+This interactive map makes the NYC street tree data much easier to explore. Instead of displaying more than a million points at once, the map groups trees into clusters that show how many trees are in each area. As you zoom in, the clusters break apart and individual tree locations become visible. This lets users quickly see where trees are most concentrated while still allowing detailed exploration of specific neighborhoods or blocks.
+```{r}
+library(leaflet)
+
+library(sf)
+
+nyc_trees_coords <- nyc_trees |>
+  st_transform(4326) |>                  # ensure WGS84 lat/lon
+  mutate(
+    longitude = st_coordinates(geometry)[,1],
+    latitude  = st_coordinates(geometry)[,2]
+  )
+
+
+library(leaflet)
+
+leaflet(nyc_trees_coords) |>
+  addTiles() |>
+  addCircleMarkers(
+    lng = ~longitude,
+    lat = ~latitude,
+    radius = 2,
+    color = ~factor(tpstructure),
+    stroke = FALSE,
+    fillOpacity = 0.4,
+    clusterOptions = markerClusterOptions()
+  )
+
+
+```
+
 ## District-Level Analyses of Trees
 The chart below gives us a general view about the trees in district-level.
 
