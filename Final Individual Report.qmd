@@ -27,52 +27,53 @@ How is social media usage associated with indicators of anxiety, depression, and
 5. **Do different levels of social media use associate with different mental health outcomes across users?**
 
 # Data acquisition and processing
-Three datasets were collected from Kaggle for this project. While the overall analysis draws on all three sources, this individual report focuses on the **Tech Use & Stress Wellness** dataset to address **Specific Question 5**.
+The datasets were programmatically downloaded using the authenticated Kaggle API via command-line interface, ensuring reproducibility and avoiding manual browser-based access. The data were then imported and analyzed in R.
+
+**Data Acquisition**
+
+- Three datasets were obtained from Kaggle, an open data platform that hosts publicly available datasets related to social media usage, technology habits, and mental well-being.
+- The datasets were downloaded using the Kaggle API, which allows programmatic access to Kaggle resources through authenticated requests.
+- Prior to downloading the data, a Kaggle API token (kaggle.json) was generated from the user’s Kaggle account and securely configured in the local environment to enable API access.
+- Each dataset was downloaded in compressed (.zip) format and subsequently unzipped locally using command-line tools.
+- All extracted CSV files were organized into a dedicated project directory (data/final/) to maintain a clear and reproducible data structure.
+- The datasets were then imported into R using the readr::read_csv() function with relative file paths, ensuring portability and reproducibility across different computing environments.
+
+**Datasets Used**
 
 - [Students' Social Media Addiction](https://www.kaggle.com/datasets/adilshamim8/social-media-addiction-vs-relationships?resource=download)
 - [Tech Gadget Usage and Mental Wellbeing](https://www.kaggle.com/datasets/kasunvishvajith/tech-gadget-usage-and-mental-wellbeing)
 - [Tech Use & Stress Wellness](https://www.kaggle.com/datasets/nagpalprabhavalkar/tech-use-and-stress-wellness)
 
-```{r}
-# --- Load Tech Use & Stress Wellness dataset from Kaggle API ---
-
-# Step 1: Download the dataset zip file using Kaggle API
-# system("kaggle datasets download -d nagpalprabhavalkar/tech-use-and-stress-wellness")
-
-# Step 2: Unzip the downloaded file
-# unzip("tech-use-and-stress-wellness.zip")
-
-# Step 3: Load the CSV file into R
-# stress_wellness <- read.csv("tech_use_and_stress_wellness.csv")
-
-# Step 4: Inspect structure to confirm successful loading
-# str(stress_wellness)
-
-```
-
-```{r}
-addiction <- read.csv("/Users/xjw/Downloads/9750 final/Students Social Media Addiction.csv",header=TRUE )
-mental_wellbeing <- read.csv("/Users/xjw/Downloads/9750 final/Tech_Gadget_Usage_and_Mental_Wellbeing.csv",header=TRUE)
-stress_wellness <- read.csv("/Users/xjw/Downloads/9750 final/Tech_Use_Stress_Wellness.csv",header=TRUE)
-```
-
-# Data analysis
-## Adjustment of Specific Question 5 (SQ5)
-During the initial exploration of SQ5, appropriate indicators to address the original question were not available in the selected datasets. To ensure alignment with the Overarching Question (OQ) and avoid overlap with the first four specific questions, SQ5 was revised.
-
-The original SQ5 asked: “Do users who actively post or share content report different emotional well-being compared to passive consumers?” Prior research has highlighted meaningful distinctions between active social media use (e.g., posting and sharing) and passive use (e.g., browsing and consuming content). For example, studies such as [Active and passive behavior in social media](https://www.sciencedirect.com/science/article/pii/S2772503023000087) and [Differences between Active and Passive Social Media Usage on Well-Being in Reference to Adolescents](https://www.researchgate.net/publication/380943752_Differences_between_Active_and_Passive_Social_Media_Usage_on_Well-Being_in_Reference_to_Adolescents) suggest that these usage styles may have different psychological implications. However, the datasets used in this project do not include behavioral indicators that allow users to be classified as active or passive. As a result, the original version of SQ5 could not be empirically tested and remains a topic for future research.
-
-The revised SQ5 is: “Do different levels of social media use associate with different mental health outcomes across users?” This adjusted question focuses on usage intensity rather than usage style, enabling group-based comparisons that are observable in the available data. Importantly, the revised SQ5 does not overlap with SQ1 (prediction), SQ2 (academic performance), SQ3 (platform-specific effects), or SQ4 (temporal trends), while still directly supporting the project’s overarching research objective.
-
-## Relationship between Mental Health Score and Usage Groups
-Social media usage was categorized into low, medium, and high groups based on tertiles of daily social media hours. Participants in the lowest third of usage were classified as low users, those in the middle third as medium users, and those in the highest third as high users. This tertile-based approach ensured balanced group sizes and avoided arbitrary cutoffs. To address Specific Question 5, mental health scores were compared across these usage groups using a one-way ANOVA, followed by Tukey post-hoc tests and a bootstrap robustness check.
-
-### One-Way ANOVA
-One-Way ANOVA showed that Social media usage level is associated with mental health outcomes. There are statistically significant differences in mean mental health scores between at least two usage groups, with a p-value almost 0 (<2e-16), meaning that this result is not due to chance. This is a very strong result with 5,000 observations.
-
 ```{r, include=FALSE}
-# Create usage groups (Low / Medium / High)
-df <- stress_wellness
+library(readr)
+# Download the dataset zip file using Kaggle API
+
+# Create file "final"
+dir.create("data/final", recursive = TRUE)
+
+# Load the CSV file into R
+stress_wellness <- read_csv("data/final/Tech_Use_Stress_Wellness.csv")
+mental_wellbeing <- read_csv("data/final/Tech_Gadget_Usage_and_Mental_Wellbeing.csv")
+addiction <- read_csv("data/final/Students Social Media Addiction.csv")
+
+```
+
+**Data Processing**
+
+While the overall analysis draws on all three sources, this individual report focuses on the **Tech Use & Stress Wellness** dataset to address **Specific Question 5**. To address SQ5, the dataset was filtered to include only variables directly related to social media use and mental health, including user ID, age, gender, social media usage hours, mental health score, and mindfulness minutes per day. A categorical Usage Group variable (low, moderate, high) was created based on social media usage levels to facilitate group comparisons. This focused preprocessing ensured alignment with SQ5 and supported the overall research question in conjunction with other sub-questions.
+
+```{r, message=FALSE}
+# Create usage groups (Low / Medium / High) and the subset
+library(dplyr)
+df <- stress_wellness|>
+  select(
+    user_id,
+    age,
+    gender,
+    mental_health_score,
+    social_media_hours,
+    mindfulness_minutes_per_day
+  )
 
 # Create tertiles of social media use
 df$usage_group <- cut(
@@ -82,6 +83,41 @@ df$usage_group <- cut(
   include.lowest = TRUE
 )
 
+library(DT)
+datatable(
+  df,
+  colnames = c(
+    "User ID",
+    "Age",
+    "Gender",
+    "Social Media Usage (Hours)",
+    "Mental Health Score",
+    "Mindfulness (Minutes / Day)",
+    "Usage Group"
+  ),
+  options = list(
+    pageLength = 5,
+    scrollX = TRUE
+  )
+)
+
+```
+
+# Data analysis
+## Refinement of Specific Question 5 (SQ5)
+During the initial exploration of SQ5, appropriate indicators to address the original question were not available in the selected datasets. To ensure alignment with the Overarching Question (OQ) and avoid overlap with the first four specific questions, SQ5 was revised.
+
+The original SQ5 asked: “Do users who actively post or share content report different emotional well-being compared to passive consumers?” Prior research has highlighted meaningful distinctions between active social media use (e.g., posting and sharing) and passive use (e.g., browsing and consuming content). For example, studies such as [Active and passive behavior in social media](https://www.sciencedirect.com/science/article/pii/S2772503023000087) and [Differences between Active and Passive Social Media Usage on Well-Being in Reference to Adolescents](https://www.researchgate.net/publication/380943752_Differences_between_Active_and_Passive_Social_Media_Usage_on_Well-Being_in_Reference_to_Adolescents) suggest that these usage styles may have different psychological implications. However, the datasets used in this project do not include behavioral indicators that allow users to be classified as active or passive. As a result, the original version of SQ5 could not be empirically tested and remains a topic for future research.
+
+The revised SQ5 is: “Do different levels of social media use associate with different mental health outcomes across users?” This adjusted question focuses on usage intensity rather than usage style, enabling group-based comparisons that are observable in the available data. Importantly, the revised SQ5 does not overlap with SQ1 (prediction), SQ2 (academic performance), SQ3 (platform-specific effects), or SQ4 (temporal trends), while still directly supporting the project’s overarching research objective.
+
+## Differences in Mental Health Scores Across Social Media Usage Levels
+Social media usage was categorized into low, medium, and high groups based on tertiles of daily social media hours. Participants in the lowest third of usage were classified as low users, those in the middle third as medium users, and those in the highest third as high users. This tertile-based approach ensured balanced group sizes and avoided arbitrary cutoffs. To address Specific Question 5, mental health scores were compared across these usage groups using a one-way ANOVA, followed by Tukey post-hoc tests and a bootstrap robustness check.
+
+### One-Way ANOVA
+One-Way ANOVA showed that Social media usage level is associated with mental health outcomes. There are statistically significant differences in mean mental health scores between at least two usage groups, with a p-value almost 0 (<2e-16), meaning that this result is not due to chance. This is a very strong result with 5,000 observations.
+
+```{r, include=FALSE}
 # Run ANOVA
 anova_model <- aov(mental_health_score ~ usage_group, data = df)
 summary(anova_model)
@@ -200,7 +236,7 @@ abline(v = 0, col = "red", lwd = 2)
 
 
 ```
-## Relationship Extension (Usage Group × Mindfulness)
+## Interaction Between Social Media Usage and Mindfulness Practice
 After identifying significant differences in mental health scores across social media usage groups using a one-way ANOVA, the analysis was extended with a two-way ANOVA to examine whether mindfulness practice moderates this relationship.
 
 The two-way ANOVA results show:
